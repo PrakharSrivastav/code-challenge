@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+use std::cmp::Ordering;
 use std::num::ParseIntError;
 use std::str::FromStr;
 
@@ -30,25 +31,33 @@ impl FromStr for Isbn {
                 '-' => continue,
                 '0'..='9' => {
                     digits.push(match c.to_string().parse::<u8>() {
-                        Ok(i) => { i }
-                        Err(_) => return Err(InvalidChar)
+                        Ok(i) => i,
+                        Err(_) => return Err(InvalidChar),
                     });
                     chars.push(c);
                 }
-                _ => return Err(InvalidChar)
+                _ => return Err(InvalidChar),
             }
         }
 
-        if digits.len() < 13 {
-            return Err(TooShort);
-        } else if digits.len() > 13 { return Err(TooLong); }
+        // if digits.len() < 13 {
+        //     return Err(TooShort);
+        // } else if digits.len() > 13 { return Err(TooLong); }
 
+        match digits.len().cmp(&13) {
+            Ordering::Greater => return Err(TooLong),
+            Ordering::Less => return Err(TooShort),
+            _ => (),
+        }
 
         if digits[12] != calculate_check_digit(&digits) {
             return Err(InvalidISBN::FailedCheckSum);
         }
 
-        Ok(Isbn { raw: chars.to_string(), digits })
+        Ok(Isbn {
+            raw: chars.to_string(),
+            digits,
+        })
     }
 }
 
@@ -68,13 +77,13 @@ fn calculate_check_digit(digits: &[u8]) -> u8 {
 
     match result % 10 {
         0 => 0,
-        z => 10 - z
+        z => 10 - z,
     }
 }
 
 fn weighted_value(i: usize, d: &u8) -> u8 {
     if i % 2 == 0 {
-        (*d * 1)
+        (*d)
     } else {
         (*d * 3)
     }

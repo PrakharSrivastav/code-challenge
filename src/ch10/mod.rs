@@ -5,7 +5,7 @@ use chrono::{DateTime, NaiveDate};
 
 fn weeks_between(a: &str, b: &str) -> i32 {
     let format = "%Y-%m-%d";
-    let date_from = NaiveDate::parse_from_str(a, format).unwrap()  ;
+    let date_from = NaiveDate::parse_from_str(a, format).unwrap();
     let date_to = NaiveDate::parse_from_str(b, format).unwrap();
 
     date_to.sub(date_from).num_weeks() as i32
